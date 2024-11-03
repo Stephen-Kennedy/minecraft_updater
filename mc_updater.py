@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # Author Stephen J Kennedy
-# Version 1.1
+# Version 1.2
 # Script to update Minecraft Bedrock version along with system updates
 
 import datetime
@@ -33,11 +33,11 @@ def system_update():
 
 def download_and_unzip_minecraft_server(version, download_directory, unzip_directory):
     """Downloads and unzips the Minecraft server."""
-    url = f"https://minecraft.azureedge.net/bin-linux/bedrock-server-{version}.zip"
+    url = f"https://www.minecraft.net/bedrockdedicatedserver/bin-linux/bedrock-server-{version}.zip"
     file_path = os.path.join(download_directory, f"bedrock-server-{version}.zip")
 
-    # Download server
-    wget_command = f"wget -P {download_directory} {url}"
+    # Corrected wget command with properly quoted User-Agent
+    wget_command = f"""wget --user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36" -O {file_path} {url}"""
     run_command(wget_command, "Failed to download Minecraft server")
 
     # Unzip server
@@ -81,11 +81,18 @@ def main():
     # Download and setup the new server
     download_and_unzip_minecraft_server(version, download_directory, unzip_directory)
 
-    # Restore configurations from backup
-    if os.path.exists(os.path.join(mc_backup, "server.properties")):
-        os.rename(os.path.join(mc_backup, "server.properties"), os.path.join(mc_instance, "server.properties"))
-    if os.path.exists(os.path.join(mc_backup, "worlds")):
-        os.rename(os.path.join(mc_backup, "worlds"), os.path.join(mc_instance, "worlds"))
+    # Restore configurations from backup if they exist
+    server_properties_path = os.path.join(mc_backup, "server.properties")
+    if os.path.exists(server_properties_path):
+        os.rename(server_properties_path, os.path.join(mc_instance, "server.properties"))
+    else:
+        logging.warning("server.properties file not found in backup; skipping restore.")
+
+    worlds_path = os.path.join(mc_backup, "worlds")
+    if os.path.exists(worlds_path):
+        os.rename(worlds_path, os.path.join(mc_instance, "worlds"))
+    else:
+        logging.warning("worlds directory not found in backup; skipping restore.")
 
     # Update file ownership
     chown_command = f"sudo chown -R minecraft:minecraft {mc_instance}"
