@@ -2,6 +2,10 @@
 
 This script updates one or more local Minecraft Bedrock Dedicated Server instances on Stephen's Ubuntu Minecraft VM.
 
+## Before You Run It
+
+This script contains environment-specific paths, service names, ports, and the expected `minecraft` Linux user/group. Review and adjust the values in `mc_updater.py` before running it on any server other than the one it was written for.
+
 ## What It Does
 
 - Downloads the requested Bedrock Dedicated Server Linux zip.
