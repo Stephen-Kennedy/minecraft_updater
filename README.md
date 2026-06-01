@@ -1,94 +1,89 @@
-README
+# Minecraft Bedrock Server Update Script
 
-Minecraft Bedrock Server Update Script
+This script updates one or more local Minecraft Bedrock Dedicated Server instances on Stephen's Ubuntu Minecraft VM.
 
-Overview
+## What It Does
 
-This script, authored by Stephen J. Kennedy, automates the process of updating a Minecraft Bedrock server along with performing system updates. The script includes functionality to:
-	•	Stop the Minecraft server service.
-	•	Perform system package updates and cleanup.
-	•	Backup the existing server directory.
-	•	Download and install the specified version of the Minecraft Bedrock server.
-	•	Restore critical files from the backup (e.g., server.properties, worlds).
-	•	Update file ownership and restart the Minecraft service.
+- Downloads the requested Bedrock Dedicated Server Linux zip.
+- Rejects suspiciously small downloads before touching running services.
+- Validates the zip with `unzip -t`.
+- Optionally runs system package maintenance.
+- Backs up the target server directory with a timestamped tarball.
+- Preserves `server.properties`, `worlds`, `allowlist.json`, `permissions.json`, and `mcinput.pipe`.
+- Updates the selected server instance.
+- Restores preserved files, fixes ownership, and restarts the service.
 
-Features
+## Supported Targets
 
-	•	Automated System Maintenance: Runs apt commands to keep the system updated.
-	•	Backup & Restore: Safeguards current server configurations and worlds during updates.
-	•	Minecraft Server Management: Integrates with systemctl to manage the Minecraft Bedrock service.
-	•	Custom Version Support: Prompts for the desired Minecraft server version to install.
+| Target | Path | Service | Port |
+| --- | --- | --- | --- |
+| `live` | `/usr/games/minecraft_bedrock` | `minecraft-bedrock.service` | `19132` |
+| `atlas` | `/usr/games/minecraft_bedrock_atlas` | `minecraft-bedrock-atlas.service` | `19135` |
+| `both` | Updates live, then Atlas | Both services | Both |
 
-Requirements
+## Usage
 
-	•	Python 3.x
-	•	A Linux-based system with:
-	•	wget, unzip, apt, and systemctl commands available.
-	•	Sufficient permissions to execute system commands (sudo/root access).
-	•	Minecraft Bedrock server files should reside in /usr/games/minecraft_bedrock.
+Run with sudo:
 
-Usage
+```bash
+cd /home
+sudo python3 mc_update.py
+```
 
-	1.	Clone or Download the Script
-Clone this repository or download the script directly.
-	2.	Run the Script
-Execute the script using Python 3:
+The script will prompt for the Bedrock version and target.
 
-python3 update_minecraft_bedrock.py
+You can also run it non-interactively:
 
+```bash
+sudo python3 mc_update.py --version 1.26.23.1 --target live
+sudo python3 mc_update.py --version 1.26.23.1 --target atlas
+sudo python3 mc_update.py --version 1.26.23.1 --target both
+```
 
-	3.	Follow the Prompts
-Enter the desired Minecraft Bedrock version when prompted (e.g., 1.17.10.04).
-	4.	Process Flow
-	•	The script stops the Minecraft service.
-	•	Updates the system packages.
-	•	Backs up the existing Minecraft server files.
-	•	Downloads the specified version of the Minecraft Bedrock server.
-	•	Restores important configuration files and worlds.
-	•	Starts the Minecraft service.
+Skip apt maintenance when you only want to update Minecraft:
 
-Directory Structure
+```bash
+sudo python3 mc_update.py --version 1.26.23.1 --target both --skip-system-update
+```
 
-	•	Minecraft Bedrock Server Path: /usr/games/minecraft_bedrock
-	•	Backup Path: /usr/games/backups_minecraft_bedrock/YYYY-MM-DD.minecraft_bedrock.bak
+## Backups
 
-Configuration
+Backups are written to:
 
-The script uses hardcoded paths and service names:
-	•	Minecraft Instance Directory: /usr/games/minecraft_bedrock
-	•	Service Name: minecraft-bedrock.service
+```text
+/usr/games/backups_minecraft_bedrock/
+```
 
-You may modify these paths and names in the script if your setup differs.
+Example:
 
-Logging
+```text
+/usr/games/backups_minecraft_bedrock/2026-05-31-214500.live.minecraft_bedrock.tgz
+```
 
-The script uses Python’s logging module to record:
-	•	Successful commands.
-	•	Errors and warnings.
-	•	Backup creation and restoration processes.
+## Important Version Note
 
-Logs are output directly to the console.
+Use the exact version string from the official Bedrock Dedicated Server Linux download URL.
 
-Example Output
+Example:
 
-2024-11-24 14:32:00 - INFO - Command executed successfully: apt -y update
-2024-11-24 14:32:05 - INFO - Backup created: /usr/games/backups_minecraft_bedrock/2024-11-24.minecraft_bedrock.bak
-2024-11-24 14:32:10 - INFO - Downloaded and unzipped Minecraft server version 1.17.10.04
-2024-11-24 14:32:15 - INFO - Started the Minecraft service
+```text
+1.26.23.1
+```
 
-Troubleshooting
+Do not add an extra zero unless the official URL includes it. A wrong version can produce a failed or empty download.
 
-	1.	Permission Errors: Ensure the script is executed with sufficient privileges (sudo).
-	2.	Download Issues: Confirm the Minecraft Bedrock server URL is valid and accessible.
-	3.	Restore Warnings: If the server.properties or worlds directory is missing in the backup, you may need to manually configure them.
+## Requirements
 
-Version
+- Python 3
+- `sudo`
+- `wget`
+- `unzip`
+- `tar`
+- `systemctl`
+- A `minecraft` Linux user/group
 
-	•	Script Version: 1.2
+## Version
 
-Author
+Script version: 1.3
 
-Stephen J. Kennedy
-For questions or issues, please contact GitHub Issues.
-
-This script is provided as-is, with no warranty or guarantee. Use at your own risk.
+Author: Stephen J. Kennedy
