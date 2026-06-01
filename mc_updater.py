@@ -156,6 +156,7 @@ def restore_instance_files(instance, keep_dir):
         pipe_path.unlink()
     if not pipe_path.exists():
         run_command(sudo_prefix() + ["mkfifo", str(pipe_path)], f"Failed to create {pipe_path}")
+    run_command(sudo_prefix() + ["chmod", "660", str(pipe_path)], f"Failed to set permissions for {pipe_path}")
 
     shutil.rmtree(keep_dir)
 
